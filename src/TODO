@@ -1,0 +1,19 @@
+Court terme :
+
+* Utiliser un solveur plus simple pour les étapes "la_disequality" de la
+  forme x = y \/ x < y \/ y < x
+
+
+Moyen terme :
+
+* Donner des contre-exemples avec veriT (quand veriT renverra un modèle)
+
+* Gérer l'analyse de cas sur les booléens (cf. tests/sat10.smt2)
+
+* Ajouter l'arithmétique linéaire réelle ?
+
+
+Long terme :
+
+* Interprétation dans Prop en passant par l'interprétation dans bool
+  (valable tant qu'on n'a pas le forall) si le but est une négation ?

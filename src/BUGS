@@ -1,0 +1,22 @@
+Bugs ouverts :
+
+* veriT: Lorsque dans la congruence certains prémisses sont des
+  réflexivités, ces prémisses sont supprimés. On continue cependant à
+  faire des résolutions avec ces prémisses, résolutions qui sont donc
+  fausses. Pour contourner ce problème, l'approche actuelle est de ne
+  pas supprimer les prémisses (commentaires des lignes 84 à 86 de
+  verit/veritSyntax.ml).
+
+
+Bugs en suspens :
+
+* Problème de level pour la coercion [is_true] : le [let in] est inclus
+  dedans
+
+* Se passer de l'hypothèse de bon typage de t_func dans le checker
+  veriT : ça ne semble pas marcher pour la transitivité par exemple, si
+  on doit prouver t1 = t3 avec pour hypothèses t1 = t2 et t2 = t3, et
+  que t1 et t3 sont bien typés mais pas t2.
+
+* Utiliser Vernacentries.interp et Glob_term.CbvVm dans Verit.checker,
+  mais je ne sais pas pourquoi, c'est beaucoup plus lent.
