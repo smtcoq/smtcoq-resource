@@ -15,11 +15,11 @@
 
 Require Import List.
 Require Import Bool.
-Require Import Int31.
+Require Import Int63.
 Require Import PArray.
 Require Import Resource.
 
-Local Open Scope int31_scope.
+Local Open Scope int63_scope.
 Local Open Scope array_scope.
 
 Coercion is_true (x: bool) := x = true.
@@ -474,7 +474,7 @@ Module S.
         forall id, valid rho (set s id c).
   Proof.
     unfold valid, get, set;simpl;intros.
-    destruct (Int31Properties.reflect_eqb id id0);subst.
+    destruct (Int63Properties.reflect_eqb id id0);subst.
     case_eq (id0 < length s);intros.
     rewrite PArray.get_set_same;trivial.
     rewrite PArray.get_outofbound.
@@ -537,7 +537,7 @@ Module S.
       C.valid rho c -> valid rho (set_clause s pos c).
   Proof.
     unfold valid, get, set_clause. intros rho s Hrho Hs pos c Hc id.
-    destruct (Int31Properties.reflect_eqb pos id);subst.
+    destruct (Int63Properties.reflect_eqb pos id);subst.
     case_eq (id < length s); intro H.
     unfold get;rewrite PArray.get_set_same; trivial.
     unfold C.valid;rewrite sort_uniq_correct;trivial.
@@ -570,7 +570,7 @@ Module S.
       forall pos r, valid rho (fst (set_resolve r (s,pos))).
   Proof.
     unfold set_resolve; intros rho s Hrho Hv pos r.
-    destruct (Int31Properties.reflect_eqb (geti r pos) 0);[trivial | ].
+    destruct (Int63Properties.reflect_eqb (geti r pos) 0);[trivial | ].
     set (f := (fun cp : C.t * int =>
            let (c, pos0) := cp in (C.resolve (rget r s pos0) c, pos0 + 4))).
     assert (Hsurj : (forall A B (p:A * B), p = (fst p, snd p))) by (intros A B (p1,p2);trivial). 

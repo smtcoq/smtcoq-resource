@@ -1,4 +1,4 @@
-Require Import Bool PArray Int31 Resource String List ZArith Misc State Trace.
+Require Import Bool PArray Int63 Resource String List ZArith Misc State Trace.
 Require Import ssreflect ssrbool eqtype ssrnat choice seq.
 Require Import fintype bigop ssralg ssrnum ssrint zmodp div.
 Import GRing.Theory.
@@ -98,16 +98,16 @@ Definition n2i (f : N -> bool) x := f (Z.to_N (to_Z x)).
 Definition i2l a :=
 if is_even a
  then
-  match (Lit.blit a ?= 1)%int31 with
+  match (Lit.blit a ?= 1)%int63 with
   | Eq => Blit false
   | Lt => Blit true
-  | Gt => Plit (Z.to_N [|Lit.blit a - 1|]%int31)
+  | Gt => Plit (Z.to_N [|Lit.blit a - 1|]%int63)
   end
  else
-  match (Lit.blit a ?= 1)%int31 with
+  match (Lit.blit a ?= 1)%int63 with
   | Eq => Blit true
   | Lt => Blit false
-  | Gt => Nlit (Z.to_N [|Lit.blit a - 1|]%int31)
+  | Gt => Nlit (Z.to_N [|Lit.blit a - 1|]%int63)
   end.
 
 Lemma eval_cl_interp rho c :
@@ -118,7 +118,7 @@ rewrite C_interp_or_spec eval_clE.
 elim: to_list => //= a l ->.
 rewrite /eval_lit /n2i /Lit.interp /Var.interp /Lit.is_pos /i2l.
 rewrite /interp_var.
-by case: is_even; case: (_ ?= _)%int31.
+by case: is_even; case: (_ ?= _)%int63.
 Qed.
 
 Lemma eval_cnf_valid rho c :
@@ -192,17 +192,17 @@ Definition a2l (l : dimacs) :=
      (fun x => [:: Misc.afold_left _ _  [::] cat (fun x => [::i2l x]) x]) l.
 
 Fixpoint copy_list {A B : Type} (f : A -> B) l v i :=
-  if l is a :: l1 then copy_list f l1 (set v i (f a)) (i + 1)%int31 else v.
+  if l is a :: l1 then copy_list f l1 (set v i (f a)) (i + 1)%int63 else v.
 
 Definition copy_cl l :=
-  let v := PArray.make (of_Z (Z.of_nat (size l))) 0%int31 in
+  let v := PArray.make (of_Z (Z.of_nat (size l))) 0%int63 in
   copy_list (fun x => match x with Plit n => of_Z (Z.of_N ((n + 1) * 2)) |
                                   Nlit n => of_Z (Z.of_N ((n + 1) * 2  + 1)) |
-                                  Blit true => 1%int31 |
-                                  Blit false => 0%int31 end) l v 0.
+                                  Blit true => 1%int63 |
+                                  Blit false => 0%int63 end) l v 0.
 
 Definition l2a l :=
-  let v := PArray.make (of_Z (Z.of_nat (size l))) (PArray.make 0 0%int31) in
+  let v := PArray.make (of_Z (Z.of_nat (size l))) (PArray.make 0 0%int63) in
   copy_list copy_cl l v 0.
 
 Section Erdos.

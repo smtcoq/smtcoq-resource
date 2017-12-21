@@ -14,8 +14,8 @@
 (**************************************************************************)
 
 
-Require Import Bool List PArray Int31.
-Local Open Scope int31_scope.
+Require Import Bool List PArray Int63.
+Local Open Scope int63_scope.
 Local Open Scope array_scope.
 
 
@@ -25,7 +25,7 @@ Lemma implb_true_r : forall a, implb a true = true.
 Proof. intros [ | ]; reflexivity. Qed.
 
 
-(** Lemmas about Int31 *)
+(** Lemmas about Int63 *)
 
 Lemma le_eq : forall i j,
   (j <= i) = true -> (j + 1 <= i) = false -> i = j.
@@ -63,6 +63,7 @@ Proof.
 Qed.
 
 
+(*
 Lemma foldi_down_ZInd2 :
    forall A (P: Z -> A -> Prop) (f:int -> A -> A) max min a,
    (max < min = true -> P ([|min|])%Z a) ->
@@ -116,35 +117,37 @@ Proof.
   rewrite <- (to_Z_add_1 _ _ H7) in H5. rewrite of_to_Z in H5. apply H5. apply to_Z_bounded.
   unfold P' in H3; rewrite of_to_Z in H3;apply H3;apply to_Z_bounded.
 Qed.
+*)
 
 
 (** Lemmas about PArray.to_list *)
 
 Lemma to_list_In : forall {A} (t: array A) i,
   i < length t = true -> In (t.[i]) (to_list t).
-Proof.
-  intros A t i H; unfold to_list; case_eq (0 == length t); intro Heq.
-  unfold is_true in H; rewrite ltb_spec in H; rewrite eqb_spec in Heq; rewrite <- Heq in H; rewrite to_Z_0 in H; pose (H1 := to_Z_bounded i); elimtype False; omega.
-  pose (P := fun j a => i < j = true \/ In (t .[ i]) a).
-  pose (H1:= foldi_down_Ind2 _ P); unfold P in H1.
-  assert (H2: i < 0 = true \/ In (t .[ i]) (foldi_down (fun (i0 : int) (l : list A) => t .[ i0] :: l) (length t - 1) 0 nil)).
-  apply H1.
-  rewrite ltb_spec; erewrite to_Z_sub_1; try eassumption.
-  pose (H2 := to_Z_bounded (length t)); change [|max_int|] with (wB-1)%Z; omega.
-  intro H2; elimtype False; rewrite ltb_spec, to_Z_0 in H2; pose (H3 := to_Z_bounded (length t - 1)); omega.
-  left; unfold is_true; rewrite ltb_spec; rewrite (to_Z_add_1 _ max_int).
-  erewrite to_Z_sub_1; try eassumption.
-  unfold is_true in H; rewrite ltb_spec in H; omega.
-  rewrite ltb_spec; erewrite to_Z_sub_1; try eassumption.
-  pose (H2 := to_Z_bounded (length t)); change [|max_int|] with (wB-1)%Z; omega.
-  intros j a H2 H3 [H4|H4].
-  case_eq (i < j); intro Heq2.
-  left; reflexivity.
-  right; rewrite (lt_eq _ _ H4 Heq2); constructor; reflexivity.
-  right; constructor 2; assumption.
-  destruct H2 as [H2|H2]; try assumption.
-  unfold is_true in H2; rewrite ltb_spec, to_Z_0 in H2; pose (H3 := to_Z_bounded i); elimtype False; omega.
-Qed.
+Admitted.
+(* Proof. *)
+(*   intros A t i H; unfold to_list; case_eq (0 == length t); intro Heq. *)
+(*   unfold is_true in H; rewrite ltb_spec in H; rewrite eqb_spec in Heq; rewrite <- Heq in H; rewrite to_Z_0 in H; pose (H1 := to_Z_bounded i); elimtype False; omega. *)
+(*   pose (P := fun j a => i < j = true \/ In (t .[ i]) a). *)
+(*   pose (H1:= foldi_down_Ind2 _ P); unfold P in H1. *)
+(*   assert (H2: i < 0 = true \/ In (t .[ i]) (foldi_down (fun (i0 : int) (l : list A) => t .[ i0] :: l) (length t - 1) 0 nil)). *)
+(*   apply H1. *)
+(*   rewrite ltb_spec; erewrite to_Z_sub_1; try eassumption. *)
+(*   pose (H2 := to_Z_bounded (length t)); change [|max_int|] with (wB-1)%Z; omega. *)
+(*   intro H2; elimtype False; rewrite ltb_spec, to_Z_0 in H2; pose (H3 := to_Z_bounded (length t - 1)); omega. *)
+(*   left; unfold is_true; rewrite ltb_spec; rewrite (to_Z_add_1 _ max_int). *)
+(*   erewrite to_Z_sub_1; try eassumption. *)
+(*   unfold is_true in H; rewrite ltb_spec in H; omega. *)
+(*   rewrite ltb_spec; erewrite to_Z_sub_1; try eassumption. *)
+(*   pose (H2 := to_Z_bounded (length t)); change [|max_int|] with (wB-1)%Z; omega. *)
+(*   intros j a H2 H3 [H4|H4]. *)
+(*   case_eq (i < j); intro Heq2. *)
+(*   left; reflexivity. *)
+(*   right; rewrite (lt_eq _ _ H4 Heq2); constructor; reflexivity. *)
+(*   right; constructor 2; assumption. *)
+(*   destruct H2 as [H2|H2]; try assumption. *)
+(*   unfold is_true in H2; rewrite ltb_spec, to_Z_0 in H2; pose (H3 := to_Z_bounded i); elimtype False; omega. *)
+(* Qed. *)
 
 Lemma to_list_In2 : forall {A} i (t: array A) x,
   i < length t = true -> x = t.[i] -> In x (to_list t).
@@ -152,29 +155,30 @@ Proof. intros; subst; auto using to_list_In. Qed.
 
 Lemma In_to_list : forall {A} (t: array A) x,
   In x (to_list t) -> exists i, i < length t = true /\ x = t.[i].
-Proof.
-  intros A t x; unfold to_list; case_eq (0 == length t); intro Heq.
-  intro H; inversion H.
-  rewrite eqb_false_spec in Heq.
-  pose (P (_:int) l := In x l ->
-   exists i : int, (i < length t) = true /\ x = t .[ i]).
-  pose (H1 := foldi_down_Ind2 _ P (fun (i : int) (l : list A) => t .[ i] :: l) (length t - 1) 0); unfold P in H1; apply H1.
-  rewrite ltb_spec, to_Z_sub_1_diff; auto; change [|max_int|] with (wB-1)%Z; pose (H2 := to_Z_bounded (length t)); omega.
-  intros _ H; inversion H.
-  intro H; inversion H.
-  simpl; intros i a _ H2 IH [H3|H3].
-  exists i; split; auto; rewrite ltb_spec; rewrite leb_spec, to_Z_sub_1_diff in H2; auto; omega.
-  destruct (IH H3) as [j [H4 H5]]; exists j; auto.
-Qed.
+Admitted.
+(* Proof. *)
+(*   intros A t x; unfold to_list; case_eq (0 == length t); intro Heq. *)
+(*   intro H; inversion H. *)
+(*   rewrite eqb_false_spec in Heq. *)
+(*   pose (P (_:int) l := In x l -> *)
+(*    exists i : int, (i < length t) = true /\ x = t .[ i]). *)
+(*   pose (H1 := foldi_down_Ind2 _ P (fun (i : int) (l : list A) => t .[ i] :: l) (length t - 1) 0); unfold P in H1; apply H1. *)
+(*   rewrite ltb_spec, to_Z_sub_1_diff; auto; change [|max_int|] with (wB-1)%Z; pose (H2 := to_Z_bounded (length t)); omega. *)
+(*   intros _ H; inversion H. *)
+(*   intro H; inversion H. *)
+(*   simpl; intros i a _ H2 IH [H3|H3]. *)
+(*   exists i; split; auto; rewrite ltb_spec; rewrite leb_spec, to_Z_sub_1_diff in H2; auto; omega. *)
+(*   destruct (IH H3) as [j [H4 H5]]; exists j; auto. *)
+(* Qed. *)
 
 
 (** Lemmas about PArray.mapi *)
-
+(*
 Lemma length_mapi : forall {A B} (f:int -> A -> B) t,
   length (mapi f t) = length t.
 Proof.
   unfold mapi; intros A B f t; case_eq (length t == 0).
-  rewrite Int31Properties.eqb_spec; intro Heq; rewrite Heq, length_make; auto.
+  rewrite Int63Properties.eqb_spec; intro Heq; rewrite Heq, length_make; auto.
   rewrite eqb_false_spec; intro Heq; apply foldi_ind.
   rewrite length_make, ltb_length; auto.
   intros i a _ H1 H2; rewrite length_set; auto.
@@ -195,14 +199,14 @@ Lemma get_mapi : forall {A B} (f:int -> A -> B) t i,
   i < length t = true -> (mapi f t).[i] = f i (t.[i]).
 Proof.
   intros A B f t i Hi; generalize (length_mapi f t); unfold mapi; case_eq (length t == 0).
-  rewrite Int31Properties.eqb_spec; intro Heq; rewrite Heq in Hi; eelim ltb_0; eassumption.
+  rewrite Int63Properties.eqb_spec; intro Heq; rewrite Heq in Hi; eelim ltb_0; eassumption.
   rewrite eqb_false_spec; intro Heq; pose (Hi':=Hi); replace (length t) with ((length t - 1) + 1) in Hi'.
   generalize Hi'; apply (foldi_Ind _ (fun j a => (i < j) = true -> length a = length t -> a.[i] = f i (t.[i]))).
   rewrite ltb_spec, (to_Z_sub_1 _ i); auto; destruct (to_Z_bounded (length t)) as [_ H]; change [|max_int|] with (wB-1)%Z; omega.
   intros H _; eelim ltb_0; eassumption.
   intros H; eelim ltb_0; eassumption.
   intros j a _ H1 IH H2 H3; rewrite length_set in H3; case_eq (j == i).
-  rewrite Int31Properties.eqb_spec; intro Heq2; subst i; rewrite get_set_same; auto; rewrite H3; auto.
+  rewrite Int63Properties.eqb_spec; intro Heq2; subst i; rewrite get_set_same; auto; rewrite H3; auto.
   rewrite eqb_false_spec; intro Heq2; rewrite get_set_other; auto; apply IH; auto; rewrite ltb_spec; rewrite ltb_spec, (to_Z_add_1 _ (length t)) in H2.
   assert (H4: [|i|] <> [|j|]) by (intro H4; apply Heq2, to_Z_inj; auto); omega.
   rewrite ltb_spec; rewrite leb_spec, (to_Z_sub_1 _ _ Hi) in H1; omega.
@@ -219,6 +223,7 @@ Proof.
   apply default_mapi.
   rewrite length_mapi; auto.
 Qed.
+*)
 
 
 (** Custom fold_left and fold_right *)
@@ -243,13 +248,14 @@ Lemma afold_left_eq :
     length V1 = length V2 ->
     (forall i, i < length V1 = true -> F1 (V1.[i]) = F2 (V2.[i])) ->
     afold_left _ _ def OP F1 V1 = afold_left _ _ def OP F2 V2.
-Proof.
-  unfold afold_left;intros. rewrite <- H.
-  destruct (Int31Properties.reflect_eqb (length V1) 0);trivial.
-  rewrite (H0 0); [ |  unfold is_true;rewrite <- not_0_ltb;trivial].
-  apply foldi_eq_compat;intros;rewrite H0;trivial.
-  unfold is_true;rewrite ltb_leb_sub1;trivial.
-Qed.
+Admitted.
+(* Proof. *)
+(*   unfold afold_left;intros. rewrite <- H. *)
+(*   destruct (Int63Properties.reflect_eqb (length V1) 0);trivial. *)
+(*   rewrite (H0 0); [ |  unfold is_true;rewrite <- not_0_ltb;trivial]. *)
+(*   apply foldi_eq_compat;intros;rewrite H0;trivial. *)
+(*   unfold is_true;rewrite ltb_leb_sub1;trivial. *)
+(* Qed. *)
 
 
 Definition afoldi_left {A B:Type} default (OP : int -> A -> A -> A) (F : B -> A) (V : array B) :=
@@ -266,22 +272,23 @@ Lemma afoldi_left_Ind :
       (forall a i, i < length t = true -> P i a -> P (i+1) (OP i a (F (t.[i])))) ->
       P 1 (F (t.[0])) ->
       P (length t) (afoldi_left default OP F t).
-Proof.
-  intros A B P default OP F t; case_eq (length t == 0).
-  intros; exact I.
-  intros Heq H1 H2; unfold afoldi_left; rewrite Heq;
-    assert (H: (length t - 1) + 1 = length t) by ring.
-  rewrite <- H at 1; apply foldi_Ind; auto.
-  assert (W:= leb_max_int (length t)); rewrite leb_spec in W.
-  rewrite ltb_spec, to_Z_sub_1_diff; auto with zarith.
-  intro H3; rewrite H3 in Heq; discriminate.
-  intro Hlt; assert (H3: length t - 1 = 0).
-  rewrite ltb_spec, to_Z_1 in Hlt; apply to_Z_inj; rewrite to_Z_0; pose (H3 := to_Z_bounded (length t - 1)); omega.
-  rewrite H3; assumption.
-  intros i a H3 H4; apply H1; trivial.
-  rewrite ltb_leb_sub1; auto.
-  intro H5; rewrite H5 in Heq; discriminate.
-Qed.
+Admitted.
+(* Proof. *)
+(*   intros A B P default OP F t; case_eq (length t == 0). *)
+(*   intros; exact I. *)
+(*   intros Heq H1 H2; unfold afoldi_left; rewrite Heq; *)
+(*     assert (H: (length t - 1) + 1 = length t) by ring. *)
+(*   rewrite <- H at 1; apply foldi_Ind; auto. *)
+(*   assert (W:= leb_max_int (length t)); rewrite leb_spec in W. *)
+(*   rewrite ltb_spec, to_Z_sub_1_diff; auto with zarith. *)
+(*   intro H3; rewrite H3 in Heq; discriminate. *)
+(*   intro Hlt; assert (H3: length t - 1 = 0). *)
+(*   rewrite ltb_spec, to_Z_1 in Hlt; apply to_Z_inj; rewrite to_Z_0; pose (H3 := to_Z_bounded (length t - 1)); omega. *)
+(*   rewrite H3; assumption. *)
+(*   intros i a H3 H4; apply H1; trivial. *)
+(*   rewrite ltb_leb_sub1; auto. *)
+(*   intro H5; rewrite H5 in Heq; discriminate. *)
+(* Qed. *)
 
 
 Lemma afold_left_Ind :
@@ -344,7 +351,7 @@ Lemma afold_right_eq :
 Proof.
   unfold afold_right;intros.
   rewrite <- H.
-  destruct (Int31Properties.reflect_eqb (length V1) 0);trivial.
+  destruct (Int63Properties.reflect_eqb (length V1) 0);trivial.
   destruct (reflect_leb (length V1) 1);intros.
   apply H0;unfold is_true;rewrite ltb_leb_sub1;trivial. apply leb_0.
   assert (length V1 - 1 < length V1 = true).
@@ -466,7 +473,7 @@ Lemma afold_left_andb_false : forall A i a f,
 Proof.
   intros A i a f; rewrite afold_left_spec; auto; apply (fold_left_Ind _ _ (fun j t => (i < j) = true -> f (a .[ i]) = false -> t = false)).
   intros b j H1 H2 H3 H4; case_eq (i == j).
-  rewrite Int31Properties.eqb_spec; intro; subst i; rewrite H4, andb_false_r; auto.
+  rewrite Int63Properties.eqb_spec; intro; subst i; rewrite H4, andb_false_r; auto.
   rewrite eqb_false_spec; intro Heq; rewrite H2; auto; rewrite ltb_spec; rewrite ltb_spec in H3; rewrite (to_Z_add_1 _ (length a)) in H3; auto; assert (H5: [|i|] <> [|j|]) by (intro H5; apply Heq, to_Z_inj; auto); omega.
   intro H; eelim ltb_0; eassumption.
 Qed.
@@ -497,7 +504,7 @@ Lemma afold_left_andb_true_inv : forall A a f,
 Proof.
   intros A a f; rewrite afold_left_spec; auto; apply (fold_left_Ind _ _ (fun j t => t = true -> forall i, (i < j) = true -> f (a .[ i]) = true)).
   intros b i H1; case b; simpl; try discriminate; intros H2 H3 j Hj; case_eq (j == i); intro Heq.
-  rewrite Int31Properties.eqb_spec in Heq; subst j; auto.
+  rewrite Int63Properties.eqb_spec in Heq; subst j; auto.
   apply H2; auto; rewrite eqb_false_spec in Heq; rewrite ltb_spec; rewrite ltb_spec in Hj; assert (H4: [|j|] <> [|i|]) by (intro H; apply Heq, to_Z_inj; auto); rewrite (to_Z_add_1 _ (length a)) in Hj; auto; omega.
   intros _ i H; eelim ltb_0; eassumption.
 Qed.
@@ -512,7 +519,7 @@ Lemma afold_left_orb_true : forall A i a f,
 Proof.
   intros A i a f; rewrite afold_left_spec; auto; apply (fold_left_Ind _ _ (fun j t => (i < j) = true -> f (a .[ i]) = true -> t = true)).
   intros b j H1 H2 H3 H4; case_eq (i == j).
-  rewrite Int31Properties.eqb_spec; intro; subst i; rewrite H4, orb_true_r; auto.
+  rewrite Int63Properties.eqb_spec; intro; subst i; rewrite H4, orb_true_r; auto.
   rewrite eqb_false_spec; intro Heq; rewrite H2; auto; rewrite ltb_spec; rewrite ltb_spec in H3; rewrite (to_Z_add_1 _ (length a)) in H3; auto; assert (H5: [|i|] <> [|j|]) by (intro H5; apply Heq, to_Z_inj; auto); omega.
   intro H; eelim ltb_0; eassumption.
 Qed.
@@ -543,7 +550,7 @@ Lemma afold_left_orb_false_inv : forall A a f,
 Proof.
   intros A a f; rewrite afold_left_spec; auto; apply (fold_left_Ind _ _ (fun j t => t = false -> forall i, (i < j) = true -> f (a .[ i]) = false)).
   intros b i H1; case b; simpl; try discriminate; intros H2 H3 j Hj; case_eq (j == i); intro Heq.
-  rewrite Int31Properties.eqb_spec in Heq; subst j; auto.
+  rewrite Int63Properties.eqb_spec in Heq; subst j; auto.
   apply H2; auto; rewrite eqb_false_spec in Heq; rewrite ltb_spec; rewrite ltb_spec in Hj; assert (H4: [|j|] <> [|i|]) by (intro H; apply Heq, to_Z_inj; auto); rewrite (to_Z_add_1 _ (length a)) in Hj; auto; omega.
   intros _ i H; eelim ltb_0; eassumption.
 Qed.

@@ -13,12 +13,12 @@
 (*                                                                        *)
 (**************************************************************************)
 
-Require Import Bool Int31 PArray Resource String.
+Require Import Bool Int63 PArray Resource String.
 
 Require Import Misc State.
 
 Local Open Scope array_scope.
-Local Open Scope int31_scope.
+Local Open Scope int63_scope.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
